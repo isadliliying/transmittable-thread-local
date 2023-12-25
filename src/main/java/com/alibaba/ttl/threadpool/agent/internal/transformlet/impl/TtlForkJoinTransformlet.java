@@ -53,7 +53,7 @@ public class TtlForkJoinTransformlet implements JavassistTransformlet {
         // add new field
         final String capturedFieldName = "captured$field$added$by$ttl";
         final CtField capturedField = CtField.make("private final Object " + capturedFieldName + ";", clazz);
-        clazz.addField(capturedField, "com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doCaptureWhenNotTtlEnhanced(this);");
+        clazz.addField(capturedField, "shaded.com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doCaptureWhenNotTtlEnhanced(this);");
         logger.info("add new field " + capturedFieldName + " to class " + className);
 
         final CtMethod doExecMethod = clazz.getDeclaredMethod("doExec", new CtClass[0]);
@@ -62,9 +62,9 @@ public class TtlForkJoinTransformlet implements JavassistTransformlet {
         final String beforeCode = "if (this instanceof " + TtlEnhanced.class.getName() + ") {\n" + // if the class is already TTL enhanced(eg: com.alibaba.ttl.TtlRecursiveTask)
                 "    return " + doExec_renamed_method_name + "($$);\n" +                           // return directly/do nothing
                 "}\n" +
-                "Object backup = com.alibaba.ttl.TransmittableThreadLocal.Transmitter.replay(" + capturedFieldName + ");";
+                "Object backup = shaded.com.alibaba.ttl.TransmittableThreadLocal.Transmitter.replay(" + capturedFieldName + ");";
 
-        final String finallyCode = "com.alibaba.ttl.TransmittableThreadLocal.Transmitter.restore(backup);";
+        final String finallyCode = "shaded.com.alibaba.ttl.TransmittableThreadLocal.Transmitter.restore(backup);";
 
         doTryFinallyForMethod(doExecMethod, doExec_renamed_method_name, beforeCode, finallyCode);
     }
@@ -76,7 +76,7 @@ public class TtlForkJoinTransformlet implements JavassistTransformlet {
             for (int i = 0; i < parameterTypes.length; i++) {
                 final String paramTypeName = parameterTypes[i].getName();
                 if (FORK_JOIN_WORKER_THREAD_FACTORY_CLASS_NAME.equals(paramTypeName)) {
-                    String code = String.format("$%d = com.alibaba.ttl.threadpool.TtlForkJoinPoolHelper.getDisableInheritableForkJoinWorkerThreadFactory($%<d);", i + 1);
+                    String code = String.format("$%d = shaded.com.alibaba.ttl.threadpool.TtlForkJoinPoolHelper.getDisableInheritableForkJoinWorkerThreadFactory($%<d);", i + 1);
                     insertCode.append(code);
                 }
             }

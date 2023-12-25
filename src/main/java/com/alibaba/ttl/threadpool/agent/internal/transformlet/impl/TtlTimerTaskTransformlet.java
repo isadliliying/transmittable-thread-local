@@ -64,13 +64,13 @@ public class TtlTimerTaskTransformlet implements JavassistTransformlet {
         // add new field
         final String capturedFieldName = "captured$field$added$by$ttl";
         final CtField capturedField = CtField.make("private final Object " + capturedFieldName + ";", clazz);
-        clazz.addField(capturedField, "com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doCaptureWhenNotTtlEnhanced(this);");
+        clazz.addField(capturedField, "shaded.com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doCaptureWhenNotTtlEnhanced(this);");
         logger.info("add new field " + capturedFieldName + " to class " + className);
 
         final CtMethod runMethod = clazz.getDeclaredMethod(RUN_METHOD_NAME, new CtClass[0]);
 
-        final String beforeCode = "Object backup = com.alibaba.ttl.TransmittableThreadLocal.Transmitter.replay(" + capturedFieldName + ");";
-        final String finallyCode = "com.alibaba.ttl.TransmittableThreadLocal.Transmitter.restore(backup);";
+        final String beforeCode = "Object backup = shaded.com.alibaba.ttl.TransmittableThreadLocal.Transmitter.replay(" + capturedFieldName + ");";
+        final String finallyCode = "shaded.com.alibaba.ttl.TransmittableThreadLocal.Transmitter.restore(backup);";
 
         doTryFinallyForMethod(runMethod, beforeCode, finallyCode);
     }

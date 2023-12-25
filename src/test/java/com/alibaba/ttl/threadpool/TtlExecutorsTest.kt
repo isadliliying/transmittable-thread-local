@@ -152,7 +152,7 @@ class TtlExecutorsTest : AnnotationSpec() {
             //     from class com.alibaba.ttl.threadpool.TtlExecutorsTest
             //   (com.alibaba.ttl.threadpool.TtlUnwrapComparator is in unnamed module of loader 'bootstrap';
             //     com.alibaba.ttl.threadpool.TtlExecutorsTest is in unnamed module of loader 'app')
-            assertEquals("com.alibaba.ttl.threadpool.TtlUnwrapComparator", it!!.javaClass.name)
+            assertEquals("shaded.com.alibaba.ttl.threadpool.TtlUnwrapComparator", it!!.javaClass.name)
 
             assertTrue(isTtlRunnableUnwrapComparator(it))
 

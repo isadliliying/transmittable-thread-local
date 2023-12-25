@@ -45,8 +45,8 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
         EXECUTOR_CLASS_NAMES.add(THREAD_POOL_EXECUTOR_CLASS_NAME);
         EXECUTOR_CLASS_NAMES.add("java.util.concurrent.ScheduledThreadPoolExecutor");
 
-        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(RUNNABLE_CLASS_NAME, "com.alibaba.ttl.TtlRunnable");
-        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put("java.util.concurrent.Callable", "com.alibaba.ttl.TtlCallable");
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put(RUNNABLE_CLASS_NAME, "shaded.com.alibaba.ttl.TtlRunnable");
+        PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.put("java.util.concurrent.Callable", "shaded.com.alibaba.ttl.TtlCallable");
     }
 
     private static final String THREAD_FACTORY_CLASS_NAME = "java.util.concurrent.ThreadFactory";
@@ -108,7 +108,7 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
         //   more info see https://github.com/alibaba/transmittable-thread-local/issues/547
         if ("remove".equals(method.getName()) && parameterTypes.length == 1
                 && RUNNABLE_CLASS_NAME.equals(parameterTypes[0].getName())) {
-            String code = "$1 = com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlExecutorTransformlet.doAutoWrapForMethodRemove($1);";
+            String code = "$1 = shaded.com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.TtlExecutorTransformlet.doAutoWrapForMethodRemove($1);";
             method.insertBefore(code);
             return;
         }
@@ -119,7 +119,7 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
             if (PARAM_TYPE_NAME_TO_DECORATE_METHOD_CLASS.containsKey(paramTypeName)) {
                 String code = String.format(
                         // auto decorate to TTL wrapper
-                        "$%d = com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doAutoWrap($%<d);",
+                        "$%d = shaded.com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doAutoWrap($%<d);",
                         i + 1);
                 insertCode.append(code);
             }
@@ -141,7 +141,7 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
             for (int i = 0; i < parameterTypes.length; i++) {
                 final String paramTypeName = parameterTypes[i].getName();
                 if (THREAD_FACTORY_CLASS_NAME.equals(paramTypeName)) {
-                    String code = String.format("$%d = com.alibaba.ttl.threadpool.TtlExecutors.getDisableInheritableThreadFactory($%<d);", i + 1);
+                    String code = String.format("$%d = shaded.com.alibaba.ttl.threadpool.TtlExecutors.getDisableInheritableThreadFactory($%<d);", i + 1);
                     insertCode.append(code);
                 }
             }
@@ -165,7 +165,7 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
         try {
             final CtMethod beforeExecute = clazz.getDeclaredMethod("beforeExecute", new CtClass[]{threadClass, runnableClass});
             // unwrap runnable if IsAutoWrapper
-            String code = "$2 = com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doUnwrapIfIsAutoWrapper($2);";
+            String code = "$2 = shaded.com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doUnwrapIfIsAutoWrapper($2);";
             logger.info("insert code before method " + signatureOfMethod(beforeExecute) + " of class " +
                 beforeExecute.getDeclaringClass().getName() + ": " + code);
             beforeExecute.insertBefore(code);
@@ -177,7 +177,7 @@ public class TtlExecutorTransformlet implements JavassistTransformlet {
         try {
             final CtMethod afterExecute = clazz.getDeclaredMethod("afterExecute", new CtClass[]{runnableClass, throwableClass});
             // unwrap runnable if IsAutoWrapper
-            String code = "$1 = com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doUnwrapIfIsAutoWrapper($1);";
+            String code = "$1 = shaded.com.alibaba.ttl.threadpool.agent.internal.transformlet.impl.Utils.doUnwrapIfIsAutoWrapper($1);";
             logger.info("insert code before method " + signatureOfMethod(afterExecute) + " of class " +
                 afterExecute.getDeclaringClass().getName() + ": " + code);
             afterExecute.insertBefore(code);

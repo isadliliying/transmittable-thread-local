@@ -6,6 +6,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.LoaderClassPath;
+import javassist.NotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,6 +54,14 @@ public class ClassInfo {
         } else {
             classPool.appendClassPath(new LoaderClassPath(loader));
         }
+        //这里需要添加,不然无法通过javaassist的编译
+        try {
+            String ttlPath = System.getProperty("ttl.agent.jar.file");
+            classPool.appendClassPath(ttlPath);
+        } catch (Exception exp) {
+            //ignore
+        }
+
 
         final CtClass clazz = classPool.makeClass(new ByteArrayInputStream(classFileBuffer), false);
         clazz.defrost();

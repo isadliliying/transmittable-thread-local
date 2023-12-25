@@ -47,7 +47,7 @@ public class TtlTransformer implements ClassFileTransformer {
     }
 
     private static final String[] NO_TRANSFORM_PACKAGES_INCLUDING_SUB_PACKAGE = {
-            "com.alibaba.ttl",
+            "shaded.com.alibaba.ttl",
             "java.lang",
     };
     private static final String[] NO_TRANSFORM_ENCLOSING_CLASS_NAME = {
